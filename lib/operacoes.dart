@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:minhas_financas_digitais/editar_operacao.dart';
 import 'package:minhas_financas_digitais/helpers/adicionar_operacao.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'cadastrar_operacao.dart';
 import 'helpers/filtrar_operacoes.dart';
 import 'helpers/gerenciar_operacao.dart';
 import 'helpers/operacao_row.dart';
@@ -98,7 +100,7 @@ class _DespesasPageState extends State<DespesasPage> {
         behavior: SnackBarBehavior.floating,
         margin:
             EdgeInsets.only(bottom: 0.0), // Ajuste o valor para mover para cima
-        duration: Duration(seconds: 3),
+        duration: Duration(seconds: 2),
       ));
       _fetchReceitas();
     }
@@ -149,7 +151,7 @@ class _DespesasPageState extends State<DespesasPage> {
           backgroundColor: Colors.green,
           behavior: SnackBarBehavior.floating,
           margin: EdgeInsets.only(bottom: 0.0),
-          duration: Duration(seconds: 3),
+          duration: Duration(seconds: 2),
         ),
       );
       _fetchReceitas();
@@ -202,18 +204,18 @@ class _DespesasPageState extends State<DespesasPage> {
                     itemBuilder: (context, index) {
                       return GestureDetector(
                         onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => EditarOperacaoPage(
+                              tipoOperacao: tipoOperacao,
+                              operacaoData: filteredDespesas[index],
+                              onSave: () {
+                                _fetchReceitas();
+                                // Função para chamar após salvar
+                              },
+                            ),
+                          ));
+
                           // Open the gerenciarOperacao modal with the expense data
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return GerenciarOperacao(
-                                  operacaoData: filteredDespesas[index],
-                                  tipoOperacao: tipoOperacao,
-                                  onSave: () {
-                                    updateReceitas();
-                                  });
-                            },
-                          );
                         },
                         child: buildOperacaoRow(
                             context, filteredDespesas[index], (operacao) {
@@ -236,24 +238,39 @@ class _DespesasPageState extends State<DespesasPage> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AdicionarOperacao(
-                  tipoOperacao: tipoOperacao,
-                  onSave: () {
-                    updateReceitas();
-                  });
-            },
-          );
-        },
-        child: Icon(
-          Icons.add,
-          color: Colors.white,
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(
+            right: 16.0, bottom: 16.0), // Ajuste o espaçamento desejado
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => CadastrarOperacaoPage(
+                tipoOperacao: tipoOperacao,
+                onSave: () {
+                  _fetchReceitas();
+                  // Função para chamar após salvar
+                },
+              ),
+            ));
+
+            // showDialog(
+            //   context: context,
+            //   builder: (context) {
+            //     return AdicionarOperacao(
+            //         tipoOperacao: tipoOperacao,
+            //         onSave: () {
+            //           updateReceitas();
+            //         });
+            //   },
+            // );
+          },
+          child: Icon(
+            Icons.add,
+            color: Colors.white,
+          ),
+          backgroundColor:
+              tipoOperacao == 'receita' ? Colors.green : Colors.red,
         ),
-        backgroundColor: tipoOperacao == 'receita' ? Colors.green : Colors.red,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     );

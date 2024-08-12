@@ -136,9 +136,26 @@ class _GerenciarOperacaoModalState extends State<GerenciarOperacao> {
                 TextField(
                   controller: _valorController,
                   decoration: InputDecoration(
-                      labelText: tipoOperacao == 'receita'
-                          ? 'Valor da Receita'
-                          : 'Valor da Despesa'),
+                    labelText: tipoOperacao == 'receita'
+                        ? 'Valor da Receita'
+                        : 'Valor da Despesa',
+                    labelStyle: TextStyle(color: Colors.white),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(100.0),
+                      borderSide: BorderSide(
+                          color: Colors.white), // Define a cor da borda
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(100.0),
+                      borderSide: BorderSide(
+                          color: Colors.white), // Define a cor da borda
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(100.0),
+                      borderSide: BorderSide(
+                          color: Colors.white), // Define a cor da borda
+                    ),
+                  ),
                   keyboardType: TextInputType.number,
                 ),
                 SizedBox(height: 20),
@@ -150,6 +167,9 @@ class _GerenciarOperacaoModalState extends State<GerenciarOperacao> {
                       _isPago = value;
                     });
                   },
+                  activeColor: Colors.green,
+                  inactiveThumbColor: Colors.grey,
+                  inactiveTrackColor: Colors.black,
                 ),
                 SizedBox(height: 20),
                 TextField(
@@ -159,9 +179,26 @@ class _GerenciarOperacaoModalState extends State<GerenciarOperacao> {
                         ? operacaoData['descricao']
                         : '',
                   decoration: InputDecoration(
-                      labelText: tipoOperacao == 'receita'
-                          ? 'Nome da Receita'
-                          : 'Nome da Despesa'),
+                    labelText: tipoOperacao == 'receita'
+                        ? 'Nome da Receita'
+                        : 'Nome da Despesa',
+                    labelStyle: TextStyle(color: Colors.white),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(100.0),
+                      borderSide: BorderSide(
+                          color: Colors.white), // Define a cor da borda
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(100.0),
+                      borderSide: BorderSide(
+                          color: Colors.white), // Define a cor da borda
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(100.0),
+                      borderSide: BorderSide(
+                          color: Colors.white), // Define a cor da borda
+                    ),
+                  ),
                 ),
                 SizedBox(height: 20),
                 Row(
@@ -291,7 +328,7 @@ class _GerenciarOperacaoModalState extends State<GerenciarOperacao> {
                               backgroundColor: Colors.green,
                               behavior: SnackBarBehavior.floating,
                               margin: EdgeInsets.only(bottom: 0.0),
-                              duration: Duration(seconds: 3),
+                              duration: Duration(seconds: 2),
                             ),
                           );
                           Navigator.of(context).pop();

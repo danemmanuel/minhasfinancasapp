@@ -1,31 +1,35 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 
-class AdicionarOperacao extends StatefulWidget {
+class EditarOperacaoPage extends StatefulWidget {
   final String tipoOperacao;
-  final Function()
-      onSave; // Defina o parâmetro onSave como uma função sem argumentos
+  final dynamic operacaoData;
+  final void Function() onSave;
 
-  AdicionarOperacao({required this.tipoOperacao, required this.onSave});
+  EditarOperacaoPage({
+    required this.tipoOperacao,
+    required this.operacaoData,
+    required this.onSave,
+  });
 
   @override
-  _GerenciarOperacaoModalState createState() => _GerenciarOperacaoModalState();
+  _EditOperationPageState createState() => _EditOperationPageState();
 }
 
-class _GerenciarOperacaoModalState extends State<AdicionarOperacao> {
+class _EditOperationPageState extends State<EditarOperacaoPage> {
   late String tipoOperacao;
-  TextEditingController _nomeController = TextEditingController();
+  late dynamic operacaoData;
   final MoneyMaskedTextController _valorController = MoneyMaskedTextController(
     leftSymbol: 'R\$ ',
     decimalSeparator: ',',
     thousandSeparator: '.',
   );
+  TextEditingController _nomeController = TextEditingController();
   bool _isPago = false;
   DateTime _selectedDate = DateTime.now();
   dynamic _selectedConta;
@@ -33,26 +37,35 @@ class _GerenciarOperacaoModalState extends State<AdicionarOperacao> {
   List<dynamic> contas = [];
   List<String> categoriasDespesa = [
     'Cartão de Crédito',
-    'Alimentação',
+    'Alimentacao',
     'Mercado',
     'Lazer',
     'Casa',
     'Educação',
+    'Serviços',
     'Impostos',
+    'Saúde',
+    'Taxas',
     'Outros',
   ];
   List<String> categoriasReceita = [
     'Salário',
     'Investimento',
-    'Empréstimo',
+    'Recisão',
+    'Emprestimo',
+    'Dividendo',
     'Outros',
   ];
+  // Seus controllers e outras variáveis
 
   @override
   void initState() {
+    super.initState();
     tipoOperacao = widget.tipoOperacao;
+    operacaoData = widget.operacaoData;
     super.initState();
     _fetchContas();
+    // Inicialize seus controllers e variáveis
   }
 
   Future<void> _fetchContas() async {
@@ -101,24 +114,21 @@ class _GerenciarOperacaoModalState extends State<AdicionarOperacao> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20.0),
+    if (operacaoData != null) {
+      double valorNumerico = operacaoData['valor'].toDouble();
+      _valorController.updateValue(valorNumerico);
+    }
+
+    // Aqui você pode colocar todo o código da sua tela
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(operacaoData['descricao']),
       ),
-      child: Container(
-        width: MediaQuery.of(context).size.width * 1,
+      body: Padding(
         padding: EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                tipoOperacao == 'receita'
-                    ? 'Adicionar Receita'
-                    : 'Adicionar Despesa',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
               SizedBox(height: 20),
               TextField(
                 controller: _valorController,
@@ -147,19 +157,24 @@ class _GerenciarOperacaoModalState extends State<AdicionarOperacao> {
               ),
               SizedBox(height: 20),
               SwitchListTile(
-                  title: Text(tipoOperacao == 'receita' ? 'Recebido' : 'Pago'),
-                  value: _isPago,
-                  onChanged: (value) {
-                    setState(() {
-                      _isPago = value;
-                    });
-                  },
-                  activeColor: Colors.green,
-                  inactiveThumbColor: Colors.grey,
-                  inactiveTrackColor: Colors.black),
+                title: Text(tipoOperacao == 'receita' ? 'Recebido' : 'Pago'),
+                value: operacaoData['efetivado'] == true ? true : _isPago,
+                onChanged: (value) {
+                  setState(() {
+                    _isPago = value;
+                  });
+                },
+                activeColor: Colors.green,
+                inactiveThumbColor: Colors.grey,
+                inactiveTrackColor: Colors.black,
+              ),
               SizedBox(height: 20),
               TextField(
-                controller: _nomeController,
+                controller: _nomeController
+                  ..text =
+                      operacaoData != null && operacaoData['descricao'] != null
+                          ? operacaoData['descricao']
+                          : '',
                 decoration: InputDecoration(
                   labelText: tipoOperacao == 'receita'
                       ? 'Nome da Receita'
@@ -186,7 +201,8 @@ class _GerenciarOperacaoModalState extends State<AdicionarOperacao> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('${DateFormat('dd/MM/yyyy').format(_selectedDate)}'),
+                  Text(
+                      '${operacaoData != null && operacaoData['data'] != null ? DateFormat('dd/MM/yyyy').format(DateTime.parse(operacaoData['data'])) : 'Data não disponível'}'),
                   TextButton(
                     onPressed: () => _selectDate(context),
                     child: Text('Selecionar Data'),
@@ -212,7 +228,9 @@ class _GerenciarOperacaoModalState extends State<AdicionarOperacao> {
               ),
               SizedBox(height: 20),
               DropdownButtonFormField<String>(
-                value: _selectedCategoria,
+                value: operacaoData != null && operacaoData['categoria'] != null
+                    ? operacaoData['categoria']['descricao']
+                    : null,
                 items: tipoOperacao == 'receita'
                     ? categoriasReceita.map((categoria) {
                         return DropdownMenuItem<String>(
@@ -238,12 +256,12 @@ class _GerenciarOperacaoModalState extends State<AdicionarOperacao> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red, // Cor do botão Cancelar
                     ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
                     child:
                         Text('Cancelar', style: TextStyle(color: Colors.white)),
                   ),
@@ -265,16 +283,25 @@ class _GerenciarOperacaoModalState extends State<AdicionarOperacao> {
                               'https://financess-back.herokuapp.com/despesa');
 
                       Map<String, dynamic> requestBody = {
+                        "_id": operacaoData['_id'],
                         "descricao": _nomeController.text,
                         "efetivado": _isPago,
                         "valor": _valorController.numberValue,
+                        "repetirPor": 0,
+                        "fixa": false,
                         "data": DateFormat('yyyy-MM-dd').format(_selectedDate),
-                        "categoria": {"descricao": _selectedCategoria},
-                        "conta": _selectedConta,
+                        "categoria": {
+                          "descricao": _selectedCategoria != null
+                              ? _selectedCategoria
+                              : operacaoData['categoria']['descricao'],
+                          "_id": '66b9ea9664ad1d0015c1c95f'
+                        },
+                        "conta": _selectedConta
                       };
+
                       print(json.encode(requestBody));
 
-                      final response = await http.post(
+                      final response = await http.put(
                         url,
                         headers: {
                           'Authorization': 'Bearer $authToken',
@@ -283,7 +310,7 @@ class _GerenciarOperacaoModalState extends State<AdicionarOperacao> {
                         body: json.encode(requestBody),
                       );
 
-                      if (response.statusCode == 201) {
+                      if (response.statusCode == 200) {
                         // Despesa salva com sucesso
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -306,11 +333,11 @@ class _GerenciarOperacaoModalState extends State<AdicionarOperacao> {
                       }
                       widget.onSave();
                     },
+                    child: Text('Atualizar',
+                        style: TextStyle(color: Colors.white)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green, // Cor do botão Salvar
                     ),
-                    child: Text('Adicionar',
-                        style: TextStyle(color: Colors.white)),
                   ),
                 ],
               ),
