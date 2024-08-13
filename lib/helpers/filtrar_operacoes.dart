@@ -10,7 +10,6 @@ List<dynamic>? filterDespesas(List<dynamic>? despesas, int ano, int mes) {
       // Formato de ano-mês para comparação
       String anoMes =
           '${ano.toString().padLeft(4, '0')}-${mes.toString().padLeft(2, '0')}';
-      print(anoMes);
       // Verifica se a despesa é fixa e processa com base no conteúdo de excluirData
       bool isDespesaFixaValida = false;
       if (operacao['fixa'] == true) {

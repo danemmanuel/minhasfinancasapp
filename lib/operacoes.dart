@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'cadastrar_operacao.dart';
+import 'components/SkeletonLoader.dart';
 import 'helpers/filtrar_operacoes.dart';
 import 'helpers/gerenciar_operacao.dart';
 import 'helpers/operacao_row.dart';
@@ -178,6 +179,8 @@ class _DespesasPageState extends State<DespesasPage> {
 
   @override
   Widget build(BuildContext context) {
+    bool isLoading = receitas.isEmpty;
+
     List<dynamic>? filteredDespesas =
         filterDespesas(receitas, _selectedDate.year, _selectedDate.month);
 
@@ -210,7 +213,10 @@ class _DespesasPageState extends State<DespesasPage> {
                           : Colors.redAccent)),
               SizedBox(height: 20), // Espaçamento entre os itens
 
-              if (filteredDespesas != null && filteredDespesas.isNotEmpty)
+              // Exibe o SkeletonLoader enquanto os dados estão carregando
+              if (isLoading)
+                Expanded(child: SkeletonLoader())
+              else if (filteredDespesas != null && filteredDespesas.isNotEmpty)
                 Expanded(
                   child: ListView.builder(
                     padding: EdgeInsets.only(top: 8),
@@ -241,6 +247,15 @@ class _DespesasPageState extends State<DespesasPage> {
                     },
                   ),
                 )
+              else
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      'Nenhuma ${tipoOperacao == 'receita' ? 'receita' : 'despesa'} encontrada.',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
