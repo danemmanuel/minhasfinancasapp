@@ -94,7 +94,7 @@ class _EditOperationPageState extends State<EditarOperacaoPage> {
       "efetivado": _isPago,
       "valor": _valorController.numberValue,
       "repetirPor": 0,
-      "fixa": false,
+      "fixa": operacaoData['fixa'],
       "data": DateFormat('yyyy-MM-dd').format(_selectedDate),
       "categoria": {
         "descricao": _selectedCategoria != null
@@ -102,6 +102,16 @@ class _EditOperationPageState extends State<EditarOperacaoPage> {
             : operacaoData['categoria']['descricao'],
         "_id": '66b9ea9664ad1d0015c1c95f'
       },
+      "excluirData": operacaoData['fixa'] == true &&
+              _isPago == true &&
+              operacaoData['efetivado'] == false
+          ? [
+              ...(operacaoData['excluirData'] != null
+                  ? List<String>.from(operacaoData['excluirData'])
+                  : []),
+              DateFormat('yyyy-MM-dd').format(_selectedDate),
+            ]
+          : [],
       "conta": _selectedConta
     };
 
