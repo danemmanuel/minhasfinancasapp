@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-Widget Button(String label, Color background, Function onClick) {
+Widget Button(String label, Color background, dynamic onClick) {
   return ElevatedButton(
     onPressed: () {
       onClick();

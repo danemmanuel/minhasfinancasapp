@@ -23,6 +23,7 @@ class CadastrarOperacaoPage extends StatefulWidget {
 }
 
 class _EditOperationPageState extends State<CadastrarOperacaoPage> {
+  bool _isButtonEnabled = false;
   late String tipoOperacao;
   final MoneyMaskedTextController _valorController = MoneyMaskedTextController(
     leftSymbol: 'R\$ ',
@@ -31,6 +32,7 @@ class _EditOperationPageState extends State<CadastrarOperacaoPage> {
   );
   TextEditingController _nomeController = TextEditingController();
   bool _isPago = false;
+  bool _isFixo = false;
   DateTime _selectedDate = DateTime.now();
   dynamic _selectedConta;
   dynamic _selectedCategoria;
@@ -62,9 +64,20 @@ class _EditOperationPageState extends State<CadastrarOperacaoPage> {
   void initState() {
     super.initState();
     tipoOperacao = widget.tipoOperacao;
-    super.initState();
+    _nomeController.addListener(() {
+      setState(() {
+        _isButtonEnabled = _nomeController.text.isNotEmpty;
+      });
+    });
     _fetchContas();
     // Inicialize seus controllers e variáveis
+  }
+
+  @override
+  void dispose() {
+    _valorController.dispose();
+    _nomeController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchContas() async {
@@ -91,6 +104,9 @@ class _EditOperationPageState extends State<CadastrarOperacaoPage> {
         if (contas.isNotEmpty) {
           _selectedConta = contas[0]; // Set the default selected account
         }
+        dynamic categorias =
+            tipoOperacao == 'receita' ? categoriasReceita : categoriasDespesa;
+        _selectedCategoria = categorias[0];
       });
     } else {
       print('Failed to fetch accounts. Status code: ${response.statusCode}');
@@ -128,6 +144,7 @@ class _EditOperationPageState extends State<CadastrarOperacaoPage> {
     Map<String, dynamic> requestBody = {
       "descricao": _nomeController.text,
       "efetivado": _isPago,
+      "fixa": _isFixo,
       "valor": _valorController.numberValue,
       "data": DateFormat('yyyy-MM-dd').format(_selectedDate),
       "categoria": {"descricao": _selectedCategoria},
@@ -259,6 +276,20 @@ class _EditOperationPageState extends State<CadastrarOperacaoPage> {
                     inactiveThumbColor: Colors.grey,
                     inactiveTrackColor: Colors.black,
                   )),
+                  Container(
+                      child: SwitchListTile(
+                    contentPadding: const EdgeInsets.all(0),
+                    title: Text('fixo'),
+                    value: _isFixo,
+                    onChanged: (value) {
+                      setState(() {
+                        _isFixo = value;
+                      });
+                    },
+                    activeColor: Colors.green,
+                    inactiveThumbColor: Colors.grey,
+                    inactiveTrackColor: Colors.black,
+                  )),
                   SizedBox(height: 20),
                   LabelInput('data'),
                   Row(
@@ -362,8 +393,8 @@ class _EditOperationPageState extends State<CadastrarOperacaoPage> {
                   Row(
                     children: [
                       Expanded(
-                        child: Button(
-                            'adicionar', Colors.green, _cadastrarOperacao),
+                        child: Button('adicionar', Colors.green,
+                            _isButtonEnabled ? _cadastrarOperacao : null),
                       ),
                     ],
                   )
