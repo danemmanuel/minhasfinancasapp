@@ -103,6 +103,7 @@ class _EditOperationPageState extends State<CadastrarOperacaoPage> {
       initialDate: _selectedDate,
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
+      locale: const Locale('pt', 'BR'), // Define o locale como pt_BR
     );
     if (picked != null && picked != _selectedDate) {
       setState(() {
@@ -263,7 +264,10 @@ class _EditOperationPageState extends State<CadastrarOperacaoPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('${DateFormat('dd/MM/yyyy').format(_selectedDate)}'),
+                      Text(
+                        '${DateFormat('dd MMM yyyy', 'pt_BR').format(_selectedDate)}',
+                        style: TextStyle(fontSize: 15),
+                      ),
                       Row(
                         children: [
                           Button(
@@ -354,21 +358,13 @@ class _EditOperationPageState extends State<CadastrarOperacaoPage> {
                         labelText: 'selecione',
                         floatingLabelBehavior: FloatingLabelBehavior.never),
                   ),
-                  SizedBox(height: 30),
+                  SizedBox(height: 50),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                        ),
-                        child: Text('cancelar',
-                            style: TextStyle(color: Colors.white)),
+                      Expanded(
+                        child: Button(
+                            'adicionar', Colors.green, _cadastrarOperacao),
                       ),
-                      Button('adicionar', Colors.green, _cadastrarOperacao)
                     ],
                   )
                 ]))

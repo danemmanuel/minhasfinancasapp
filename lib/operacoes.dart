@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:minhas_financas_digitais/editar_operacao.dart';
 import 'package:minhas_financas_digitais/helpers/adicionar_operacao.dart';
 import 'dart:convert';
@@ -128,10 +129,23 @@ class _DespesasPageState extends State<DespesasPage> {
       "efetivado": true,
       "valor": operacao['valor'],
       "repetirPor": 0,
-      "data": operacao['data'],
+      "fixa": operacao['fixa'],
+      "data": operacao['fixa'] == true
+          ? DateFormat('yyyy-MM-dd')
+              .format(DateTime(_selectedDate.year, _selectedDate.month, 1))
+          : operacao['data'] != null
+              ? operacao['data']
+              : DateFormat('yyyy-MM-dd').format(DateTime.now()),
+      "excluirData": [
+        ...(operacao['excluirData'] != null
+            ? List<String>.from(operacao['excluirData'])
+            : []),
+        DateFormat('yyyy-MM-dd').format(_selectedDate),
+      ],
       "categoria": operacao['categoria'],
       "conta": operacao['conta']
     };
+
     final response = await http.put(url,
         headers: {
           'Authorization': 'Bearer $authToken',
@@ -217,23 +231,16 @@ class _DespesasPageState extends State<DespesasPage> {
 
                           // Open the gerenciarOperacao modal with the expense data
                         },
-                        child: buildOperacaoRow(
-                            context, filteredDespesas[index], (operacao) {
-                          _deletarOperacao(operacao);
-                        }, (operacao) {
-                          _efetivarOperacao(operacao);
-                        }),
+                        child: OperacaoRow(
+                          despesa: filteredDespesas[index],
+                          onDelete: _deletarOperacao,
+                          onEfetivar: _efetivarOperacao,
+                          selectedDate: _selectedDate,
+                        ),
                       );
                     },
                   ),
                 )
-              else
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(100),
-                    child: CircularProgressIndicator(),
-                  ),
-                ),
             ],
           ),
         ),

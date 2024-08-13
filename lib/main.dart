@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'operacoes.dart';
 import 'home_page.dart';
 import 'login_page.dart';
 import 'page_container.dart';
+import 'package:flutter_localizations/flutter_localizations.dart'; // Import necessário para localizações globais
 
-void main() {
+void main() async {
+  await initializeDateFormatting('pt_BR', null);
+
   runApp(MyApp());
 }
 
@@ -49,6 +53,16 @@ class MyApp extends StatelessWidget {
           ];
 
           return MaterialApp(
+            locale: Locale('pt', 'BR'), // Define a localidade como pt_BR
+            supportedLocales: [
+              const Locale('en', 'US'),
+              const Locale('pt', 'BR'), // Adiciona suporte a pt_BR
+            ],
+            localizationsDelegates: [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
             theme: ThemeData
                 .dark(), // Define o tema do aplicativo como tema escuro
             home: authToken.isNotEmpty
