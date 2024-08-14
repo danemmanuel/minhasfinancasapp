@@ -206,7 +206,7 @@ class _DespesasPageState extends State<DespesasPage> {
                   });
                 },
               ),
-              Text(tipoOperacao == 'receita' ? 'Receitas' : 'Despesas',
+              Text(tipoOperacao == 'receita' ? 'RECEITAS' : 'DESPESAS',
                   style: TextStyle(
                       color: tipoOperacao == 'receita'
                           ? Colors.greenAccent

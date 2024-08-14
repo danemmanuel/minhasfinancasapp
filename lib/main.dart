@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'operacoes.dart';
-import 'home_page.dart';
+import 'contas_page.dart';
 import 'login_page.dart';
 import 'page_container.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'; // Import necessário para localizações globais
@@ -37,8 +37,8 @@ class MyApp extends StatelessWidget {
 
           List<BottomNavigationBarItem> bottomNavBarItems = [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Geral',
+              icon: Icon(Icons.account_balance),
+              label: 'Contas',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.keyboard_arrow_up),
