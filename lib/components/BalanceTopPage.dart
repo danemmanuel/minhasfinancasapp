@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 class BalanceItem {
   final dynamic titulo;
   final dynamic valor;
+  final dynamic background;
 
-  BalanceItem({required this.titulo, required this.valor});
+  BalanceItem(
+      {required this.titulo, required this.valor, required this.background});
 }
 
 class BalanceTopPage extends StatelessWidget {
@@ -28,11 +30,11 @@ class BalanceTopPage extends StatelessWidget {
               borderRadius: BorderRadius.only(
                 topRight: Radius.circular(10.0), // Keep the right side rounded
                 bottomRight: Radius.circular(10.0),
-                topLeft: Radius.circular(0.0), // No rounding on the left side
-                bottomLeft: Radius.circular(0.0),
+                topLeft: Radius.circular(10.0), // No rounding on the left side
+                bottomLeft: Radius.circular(10.0),
               ),
             ),
-            color: Colors.green,
+            color: item1.background,
             child: ListTile(
               leading: Icon(
                 Icons.attach_money,
@@ -68,18 +70,17 @@ class BalanceTopPage extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(width: 0),
         Expanded(
           child: Card(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
-                topRight: Radius.circular(0), // Keep the right side rounded
-                bottomRight: Radius.circular(0),
+                topRight: Radius.circular(10), // Keep the right side rounded
+                bottomRight: Radius.circular(10),
                 topLeft: Radius.circular(10.0), // No rounding on the left side
                 bottomLeft: Radius.circular(10.0),
               ),
             ),
-            color: Colors.blue,
+            color: item2.background,
             child: ListTile(
               leading: Icon(
                 Icons.account_balance,

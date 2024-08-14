@@ -24,6 +24,7 @@ class _HomePageState extends State<HomePage> {
   List<dynamic>? receitasAll = [];
   List<dynamic>? despesas = [];
   List<dynamic>? despesasAll = [];
+  List<dynamic>? contas = [];
 
   @override
   void initState() {
@@ -46,9 +47,11 @@ class _HomePageState extends State<HomePage> {
     );
 
     if (response.statusCode == 200) {
-      List<dynamic> contas = json.decode(response.body);
+      setState(() {
+        contas = json.decode(response.body);
+      });
 
-      for (var conta in contas) {
+      for (var conta in contas!) {
         String instituicao = conta['instituicao'];
         double saldo = (conta['saldo'] as num).toDouble();
 
@@ -161,7 +164,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(0),
+          padding: const EdgeInsets.all(10),
           child: Column(
             children: [
               SizedBox(height: 50),
@@ -182,17 +185,100 @@ class _HomePageState extends State<HomePage> {
                   });
                 },
               ),
-              Text('SALDOS'),
-              SizedBox(height: 10),
               BalanceTopPage(
                 isLoading: _isLoading,
                 item1: BalanceItem(
                     titulo: 'Saldo Atual',
-                    valor: formatarValorMonetario(_calculateSaldoAtual())),
+                    valor: formatarValorMonetario(_calculateSaldoAtual()),
+                    background: Colors.green),
                 item2: BalanceItem(
-                    titulo: 'Saldo Previsto',
-                    valor: formatarValorMonetario(_calculateSaldoPrevisto())),
-              )
+                    titulo: 'Previsto',
+                    valor: formatarValorMonetario(_calculateSaldoPrevisto()),
+                    background: Colors.blue),
+              ),
+              SizedBox(height: 20),
+              Expanded(
+                child: GridView.builder(
+                  padding: EdgeInsets.all(0),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 1,
+                    childAspectRatio: 3.8,
+                    crossAxisSpacing: 0,
+                    mainAxisSpacing: 0,
+                  ),
+                  itemCount: contas?.length ?? 0,
+                  itemBuilder: (context, index) {
+                    var conta = contas![index];
+                    return Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      elevation: 5,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment
+                              .spaceBetween, // Espaçar os elementos
+                          crossAxisAlignment: CrossAxisAlignment
+                              .center, // Alinhar verticalmente ao centro
+                          children: [
+                            Row(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(
+                                      20), // Ajuste o valor para o raio desejado
+                                  child: Image.asset(
+                                    'assets/images/${conta['instituicao'].toString().toLowerCase()}.png', // Caminho dinâmico para a imagem
+                                    width: 50,
+                                    height: 50,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Icon(Icons
+                                          .error); // Exibir um ícone de erro se a imagem falhar ao carregar
+                                    },
+                                  ),
+                                ),
+                                SizedBox(width: 20),
+                                Text(
+                                  conta['instituicao'],
+                                  style: TextStyle(
+                                    fontSize: 17, // Tamanho da fonte
+                                    color: Colors.grey[700],
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Column(
+                              crossAxisAlignment:
+                                  CrossAxisAlignment.end, // Alinhar à direita
+                              children: [
+                                SizedBox(height: 5),
+                                Text(
+                                  'saldo de',
+                                  style: TextStyle(
+                                    fontSize:
+                                        12, // Tamanho da fonte para o texto "saldo:"
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                                Text(
+                                  formatarValorMonetario(
+                                      (conta['saldo'] as num).toDouble()),
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
             ],
           ),
         ),

@@ -5,6 +5,8 @@ import 'package:minhas_financas_digitais/pages/editar_operacao.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../components/BalanceTopPage.dart';
+import '../helpers/formatar_valor_monetario.dart';
 import 'cadastrar_operacao.dart';
 import '../components/SkeletonLoader.dart';
 import '../helpers/filtrar_operacoes.dart';
@@ -79,8 +81,6 @@ class _DespesasPageState extends State<DespesasPage> {
         : Uri.parse(
             'https://financess-back.herokuapp.com/receita/' + operacao['_id']);
 
-    print(url);
-
     final response = await http.delete(
       url,
       headers: {
@@ -135,16 +135,19 @@ class _DespesasPageState extends State<DespesasPage> {
           : operacao['data'] != null
               ? operacao['data']
               : DateFormat('yyyy-MM-dd').format(DateTime.now()),
-      "excluirData": [
-        ...(operacao['excluirData'] != null
-            ? List<String>.from(operacao['excluirData'])
-            : []),
-        DateFormat('yyyy-MM-dd').format(_selectedDate),
-      ],
+      "excluirData": operacao['fixa']
+          ? [
+              ...(operacao['excluirData'] != null
+                  ? List<String>.from(operacao['excluirData'])
+                  : []),
+              DateFormat('yyyy-MM-dd').format(_selectedDate),
+            ]
+          : [],
       "categoria": operacao['categoria'],
       "conta": operacao['conta']
     };
 
+    print(json.encode(requestBody));
     final response = await http.put(url,
         headers: {
           'Authorization': 'Bearer $authToken',
@@ -182,10 +185,22 @@ class _DespesasPageState extends State<DespesasPage> {
     List<dynamic>? filteredDespesas =
         filterDespesas(receitas, _selectedDate.year, _selectedDate.month);
 
+    double _calcularPendente() {
+      return filteredDespesas!
+          .where((operacao) =>
+              operacao['efetivado'] == false || operacao['efetivado'] == null)
+          .fold(0, (total, operacao) => total + operacao['valor']);
+    }
+
+    double _calcularTotal() {
+      return filteredDespesas!
+          .fold(0, (total, operacao) => total + operacao['valor']);
+    }
+
     return Scaffold(
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(0), // Define o padding desejado
+          padding: const EdgeInsets.all(10), // Define o padding desejado
           child: Column(
             children: [
               SizedBox(height: 50), // Espaçamento entre os itens
@@ -195,21 +210,34 @@ class _DespesasPageState extends State<DespesasPage> {
                   setState(() {
                     _selectedDate =
                         DateTime(_selectedDate.year, _selectedDate.month - 1);
+                    _calcularPendente();
                   });
                 },
                 onNextMonth: () {
                   setState(() {
                     _selectedDate =
                         DateTime(_selectedDate.year, _selectedDate.month + 1);
+                    _calcularPendente();
                   });
                 },
               ),
-              Text(tipoOperacao == 'receita' ? 'RECEITAS' : 'DESPESAS',
-                  style: TextStyle(
-                      color: tipoOperacao == 'receita'
-                          ? Colors.greenAccent
-                          : Colors.redAccent)),
-              SizedBox(height: 20), // Espaçamento entre os itens
+              BalanceTopPage(
+                isLoading: isLoading,
+                item1: BalanceItem(
+                    titulo: 'Pendente',
+                    valor: formatarValorMonetario(_calcularPendente()),
+                    background:
+                        tipoOperacao == 'receita' ? Colors.green : Colors.red),
+                item2: BalanceItem(
+                    titulo: 'Total',
+                    valor: formatarValorMonetario(_calcularTotal()),
+                    background: Colors.blue),
+              ),
+              // Text(tipoOperacao == 'receita' ? 'RECEITAS' : 'DESPESAS',
+              //     style: TextStyle(
+              //         color: tipoOperacao == 'receita'
+              //             ? Colors.greenAccent
+              //             : Colors.redAccent)),
 
               // Exibe o SkeletonLoader enquanto os dados estão carregando
               if (isLoading)
@@ -217,7 +245,7 @@ class _DespesasPageState extends State<DespesasPage> {
               else if (filteredDespesas != null && filteredDespesas.isNotEmpty)
                 Expanded(
                   child: ListView.builder(
-                    padding: EdgeInsets.only(top: 8),
+                    padding: EdgeInsets.all(0),
                     itemCount: filteredDespesas.length,
                     itemBuilder: (context, index) {
                       return GestureDetector(
