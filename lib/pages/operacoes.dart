@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:minhas_financas_digitais/editar_operacao.dart';
-import 'package:minhas_financas_digitais/helpers/adicionar_operacao.dart';
+import 'package:minhas_financas_digitais/pages/editar_operacao.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'cadastrar_operacao.dart';
-import 'components/SkeletonLoader.dart';
-import 'helpers/filtrar_operacoes.dart';
-import 'helpers/gerenciar_operacao.dart';
-import 'helpers/operacao_row.dart';
-import 'mes_ano_selector.dart';
+import '../components/SkeletonLoader.dart';
+import '../helpers/filtrar_operacoes.dart';
+import '../components/operacao_row.dart';
+import '../components/mes_ano_selector.dart';
 
 class DespesasPage extends StatefulWidget {
   final String tipoOperacao;
@@ -274,17 +272,6 @@ class _DespesasPageState extends State<DespesasPage> {
                 },
               ),
             ));
-
-            // showDialog(
-            //   context: context,
-            //   builder: (context) {
-            //     return AdicionarOperacao(
-            //         tipoOperacao: tipoOperacao,
-            //         onSave: () {
-            //           updateReceitas();
-            //         });
-            //   },
-            // );
           },
           child: Icon(
             Icons.add,

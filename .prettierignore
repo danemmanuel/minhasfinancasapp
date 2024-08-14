@@ -1,0 +1,11 @@
+# Ignore artifacts:
+build
+
+# Ignore bash files:
+super-lint-check
+
+# Ignore document file as we want everything to be on single lines
+_document.tsx
+extension-output-standard.vscode-standard-#1-JavaScript Standard Style
+.storybook/main.js
+translationKeys.ts

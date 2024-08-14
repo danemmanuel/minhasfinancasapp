@@ -6,15 +6,17 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'components/Button.dart';
-import 'components/LabelInput.dart';
+import '../components/Button.dart';
+import '../components/LabelInput.dart';
 
-class CadastrarOperacaoPage extends StatefulWidget {
+class EditarOperacaoPage extends StatefulWidget {
   final String tipoOperacao;
+  final dynamic operacaoData;
   final void Function() onSave;
 
-  CadastrarOperacaoPage({
+  EditarOperacaoPage({
     required this.tipoOperacao,
+    required this.operacaoData,
     required this.onSave,
   });
 
@@ -22,9 +24,9 @@ class CadastrarOperacaoPage extends StatefulWidget {
   _EditOperationPageState createState() => _EditOperationPageState();
 }
 
-class _EditOperationPageState extends State<CadastrarOperacaoPage> {
-  bool _isButtonEnabled = false;
+class _EditOperationPageState extends State<EditarOperacaoPage> {
   late String tipoOperacao;
+  late dynamic operacaoData;
   final MoneyMaskedTextController _valorController = MoneyMaskedTextController(
     leftSymbol: 'R\$ ',
     decimalSeparator: ',',
@@ -32,7 +34,6 @@ class _EditOperationPageState extends State<CadastrarOperacaoPage> {
   );
   TextEditingController _nomeController = TextEditingController();
   bool _isPago = false;
-  bool _isFixo = false;
   DateTime _selectedDate = DateTime.now();
   dynamic _selectedConta;
   dynamic _selectedCategoria;
@@ -64,20 +65,88 @@ class _EditOperationPageState extends State<CadastrarOperacaoPage> {
   void initState() {
     super.initState();
     tipoOperacao = widget.tipoOperacao;
-    _nomeController.addListener(() {
-      setState(() {
-        _isButtonEnabled = _nomeController.text.isNotEmpty;
-      });
-    });
+    operacaoData = widget.operacaoData;
+    _isPago = operacaoData['efetivado'] == true ? true : _isPago;
+    _selectedDate = operacaoData['data'] != null
+        ? DateTime.parse(operacaoData['data'])
+        : DateTime.now();
+
     _fetchContas();
     // Inicialize seus controllers e variáveis
   }
 
-  @override
-  void dispose() {
-    _valorController.dispose();
-    _nomeController.dispose();
-    super.dispose();
+  Future<void> _cadastrarOperacao() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? authToken = prefs.getString('authToken');
+
+    if (authToken == null) {
+      // Handle the case where authToken is null (e.g., user not authenticated)
+      return;
+    }
+
+    final url = tipoOperacao == 'receita'
+        ? Uri.parse('https://financess-back.herokuapp.com/receita')
+        : Uri.parse('https://financess-back.herokuapp.com/despesa');
+
+    Map<String, dynamic> requestBody = {
+      "_id": operacaoData['_id'],
+      "descricao": _nomeController.text,
+      "efetivado": _isPago,
+      "valor": _valorController.numberValue,
+      "repetirPor": 0,
+      "fixa": operacaoData['fixa'],
+      "data": DateFormat('yyyy-MM-dd').format(_selectedDate),
+      "categoria": {
+        "descricao": _selectedCategoria != null
+            ? _selectedCategoria
+            : operacaoData['categoria']['descricao'],
+        "_id": '66b9ea9664ad1d0015c1c95f'
+      },
+      "excluirData": operacaoData['fixa'] == true &&
+              _isPago == true &&
+              operacaoData['efetivado'] == false
+          ? [
+              ...(operacaoData['excluirData'] != null
+                  ? List<String>.from(operacaoData['excluirData'])
+                  : []),
+              DateFormat('yyyy-MM-dd').format(_selectedDate),
+            ]
+          : [],
+      "conta": _selectedConta
+    };
+
+    print(json.encode(requestBody));
+
+    final response = await http.put(
+      url,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode(requestBody),
+    );
+
+    if (response.statusCode == 200) {
+      // Despesa salva com sucesso
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            tipoOperacao == 'receita'
+                ? "Receita salva com sucesso!"
+                : 'Despesa salva com sucesso!',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(bottom: 0.0),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      Navigator.of(context).pop();
+    } else {
+      print('Failed to save expense. Status code: ${response.statusCode}');
+    }
+    widget.onSave();
   }
 
   Future<void> _fetchContas() async {
@@ -101,12 +170,11 @@ class _EditOperationPageState extends State<CadastrarOperacaoPage> {
     if (response.statusCode == 200) {
       setState(() {
         contas = json.decode(response.body).cast();
-        if (contas.isNotEmpty) {
-          _selectedConta = contas[0]; // Set the default selected account
-        }
-        dynamic categorias =
-            tipoOperacao == 'receita' ? categoriasReceita : categoriasDespesa;
-        _selectedCategoria = categorias[0];
+        _selectedConta = contas.firstWhere(
+          (conta) => conta['_id'] == operacaoData['conta']['_id'],
+          orElse: () =>
+              null, // Caso não encontre, retorna null ou defina um valor padrão
+        );
       });
     } else {
       print('Failed to fetch accounts. Status code: ${response.statusCode}');
@@ -119,76 +187,25 @@ class _EditOperationPageState extends State<CadastrarOperacaoPage> {
       initialDate: _selectedDate,
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
-      locale: const Locale('pt', 'BR'), // Define o locale como pt_BR
+      locale: const Locale('pt', 'BR'), // Defina a localidade, se necessário
     );
     if (picked != null && picked != _selectedDate) {
       setState(() {
-        _selectedDate = picked;
+        _selectedDate = picked; // Atualiza a data selecionada
       });
     }
   }
 
-  Future<void> _cadastrarOperacao() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? authToken = prefs.getString('authToken');
-
-    if (authToken == null) {
-      // Handle the case where authToken is null (e.g., user not authenticated)
-      return;
-    }
-
-    final url = tipoOperacao == 'receita'
-        ? Uri.parse('https://financess-back.herokuapp.com/receita')
-        : Uri.parse('https://financess-back.herokuapp.com/despesa');
-
-    Map<String, dynamic> requestBody = {
-      "descricao": _nomeController.text,
-      "efetivado": _isPago,
-      "fixa": _isFixo,
-      "valor": _valorController.numberValue,
-      "data": DateFormat('yyyy-MM-dd').format(_selectedDate),
-      "categoria": {"descricao": _selectedCategoria},
-      "conta": _selectedConta,
-    };
-
-    final response = await http.post(
-      url,
-      headers: {
-        'Authorization': 'Bearer $authToken',
-        'Content-Type': 'application/json',
-      },
-      body: json.encode(requestBody),
-    );
-
-    if (response.statusCode == 201) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            tipoOperacao == 'receita'
-                ? "Receita salva com sucesso!"
-                : 'Despesa salva com sucesso!',
-            style: TextStyle(color: Colors.white),
-          ),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(bottom: 0.0),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      Navigator.of(context).pop();
-    } else {
-      print('Failed to save expense. Status code: ${response.statusCode}');
-    }
-    widget.onSave();
-  }
-
   @override
   Widget build(BuildContext context) {
+    if (operacaoData != null) {
+      double valorNumerico = operacaoData['valor'].toDouble();
+      _valorController.updateValue(valorNumerico);
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.tipoOperacao == 'receita'
-            ? 'Cadastrar Receita'
-            : 'Cadastrar Despesa'),
+        title: Text(operacaoData['descricao']),
         backgroundColor: widget.tipoOperacao == 'receita'
             ? Colors.green
             : Colors.red, // Define o fundo do AppBar como verde
@@ -241,7 +258,11 @@ class _EditOperationPageState extends State<CadastrarOperacaoPage> {
                 child: Column(children: [
                   LabelInput('título'),
                   TextField(
-                    controller: _nomeController,
+                    controller: _nomeController
+                      ..text = operacaoData != null &&
+                              operacaoData['descricao'] != null
+                          ? operacaoData['descricao']
+                          : '',
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(100.0),
@@ -276,27 +297,14 @@ class _EditOperationPageState extends State<CadastrarOperacaoPage> {
                     inactiveThumbColor: Colors.grey,
                     inactiveTrackColor: Colors.black,
                   )),
-                  Container(
-                      child: SwitchListTile(
-                    contentPadding: const EdgeInsets.all(0),
-                    title: Text('fixo'),
-                    value: _isFixo,
-                    onChanged: (value) {
-                      setState(() {
-                        _isFixo = value;
-                      });
-                    },
-                    activeColor: Colors.green,
-                    inactiveThumbColor: Colors.grey,
-                    inactiveTrackColor: Colors.black,
-                  )),
                   SizedBox(height: 20),
                   LabelInput('data'),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '${DateFormat('dd MMM yyyy', 'pt_BR').format(_selectedDate)}',
+                        DateFormat('dd MMM yyyy', 'pt_BR')
+                            .format(_selectedDate),
                         style: TextStyle(fontSize: 15),
                       ),
                       Row(
@@ -366,7 +374,10 @@ class _EditOperationPageState extends State<CadastrarOperacaoPage> {
                   SizedBox(height: 30),
                   LabelInput('categoria'),
                   DropdownButtonFormField<String>(
-                    value: _selectedCategoria,
+                    value: operacaoData != null &&
+                            operacaoData['categoria'] != null
+                        ? operacaoData['categoria']['descricao']
+                        : null,
                     items: tipoOperacao == 'receita'
                         ? categoriasReceita.map((categoria) {
                             return DropdownMenuItem<String>(
@@ -393,8 +404,8 @@ class _EditOperationPageState extends State<CadastrarOperacaoPage> {
                   Row(
                     children: [
                       Expanded(
-                        child: Button('adicionar', Colors.green,
-                            _isButtonEnabled ? _cadastrarOperacao : null),
+                        child: Button(
+                            'atualizar', Colors.green, _cadastrarOperacao),
                       ),
                     ],
                   )

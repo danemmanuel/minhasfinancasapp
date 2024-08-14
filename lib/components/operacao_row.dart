@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../helpers/formatar_valor_monetario.dart';
+
 class OperacaoRow extends StatefulWidget {
   final dynamic despesa;
   final Function onDelete;
@@ -19,27 +21,6 @@ class OperacaoRow extends StatefulWidget {
 
 class _OperacaoRowState extends State<OperacaoRow> {
   Color _backgroundColor = Colors.transparent; // Cor de fundo inicial
-
-  String formatarValorMonetario(dynamic valor) {
-    if (valor == null) return 'R\$ 0,00';
-
-    double valorDouble;
-    if (valor is int) {
-      valorDouble = valor.toDouble();
-    } else if (valor is double) {
-      valorDouble = valor;
-    } else {
-      throw ArgumentError('O valor deve ser do tipo int ou double');
-    }
-
-    final NumberFormat formatador = NumberFormat.currency(
-      locale: 'pt_BR',
-      symbol: 'R\$',
-      decimalDigits: 2,
-    );
-
-    return formatador.format(valorDouble);
-  }
 
   void _piscarRow() async {
     // Adiciona um delay antes de começar a piscar

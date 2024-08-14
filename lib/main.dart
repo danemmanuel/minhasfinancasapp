@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'operacoes.dart';
-import 'contas_page.dart';
-import 'login_page.dart';
-import 'page_container.dart';
+import 'pages/operacoes.dart';
+import 'pages/contas_page.dart';
+import 'pages/login_page.dart';
+import 'components/page_container.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'; // Import necessário para localizações globais
 
 void main() async {
