@@ -281,7 +281,7 @@ class _EditOperationPageState extends State<EditarOperacaoPage> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: 10),
                   Container(
                       child: SwitchListTile(
                     contentPadding: const EdgeInsets.all(0),
@@ -349,7 +349,7 @@ class _EditOperationPageState extends State<EditarOperacaoPage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: 10),
                   LabelInput('conta'),
                   DropdownButtonFormField<Map>(
                     value: _selectedConta,
@@ -371,7 +371,7 @@ class _EditOperationPageState extends State<EditarOperacaoPage> {
                           .never, // Mantém o label fixo acima do input
                     ),
                   ),
-                  SizedBox(height: 30),
+                  SizedBox(height: 20),
                   LabelInput('categoria'),
                   DropdownButtonFormField<String>(
                     value: operacaoData != null &&
@@ -400,7 +400,7 @@ class _EditOperationPageState extends State<EditarOperacaoPage> {
                         labelText: 'selecione',
                         floatingLabelBehavior: FloatingLabelBehavior.never),
                   ),
-                  SizedBox(height: 50),
+                  SizedBox(height: 30),
                   Row(
                     children: [
                       Expanded(

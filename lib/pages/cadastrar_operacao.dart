@@ -260,7 +260,7 @@ class _EditOperationPageState extends State<CadastrarOperacaoPage> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: 10),
                   Container(
                       child: SwitchListTile(
                     contentPadding: const EdgeInsets.all(0),
@@ -290,7 +290,7 @@ class _EditOperationPageState extends State<CadastrarOperacaoPage> {
                     inactiveThumbColor: Colors.grey,
                     inactiveTrackColor: Colors.black,
                   )),
-                  SizedBox(height: 20),
+                  SizedBox(height: 10),
                   LabelInput('data'),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -341,7 +341,7 @@ class _EditOperationPageState extends State<CadastrarOperacaoPage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: 10),
                   LabelInput('conta'),
                   DropdownButtonFormField<Map>(
                     value: _selectedConta,
@@ -363,7 +363,7 @@ class _EditOperationPageState extends State<CadastrarOperacaoPage> {
                           .never, // Mantém o label fixo acima do input
                     ),
                   ),
-                  SizedBox(height: 30),
+                  SizedBox(height: 20),
                   LabelInput('categoria'),
                   DropdownButtonFormField<String>(
                     value: _selectedCategoria,
@@ -389,7 +389,7 @@ class _EditOperationPageState extends State<CadastrarOperacaoPage> {
                         labelText: 'selecione',
                         floatingLabelBehavior: FloatingLabelBehavior.never),
                   ),
-                  SizedBox(height: 50),
+                  SizedBox(height: 30),
                   Row(
                     children: [
                       Expanded(
