@@ -41,7 +41,6 @@ class _DespesasPageState extends State<DespesasPage> {
     String? authToken = prefs.getString('authToken');
 
     if (authToken == null) {
-      // Handle the case where authToken is null (e.g., user not authenticated)
       return;
     }
 
@@ -71,7 +70,6 @@ class _DespesasPageState extends State<DespesasPage> {
     String? authToken = prefs.getString('authToken');
 
     if (authToken == null) {
-      // Handle the case where authToken is null (e.g., user not authenticated)
       return;
     }
 
@@ -98,8 +96,7 @@ class _DespesasPageState extends State<DespesasPage> {
         ),
         backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
-        margin:
-            EdgeInsets.only(bottom: 0.0), // Ajuste o valor para mover para cima
+        margin: EdgeInsets.only(bottom: 0.0),
         duration: Duration(seconds: 2),
       ));
       _fetchReceitas();
@@ -200,10 +197,10 @@ class _DespesasPageState extends State<DespesasPage> {
     return Scaffold(
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(10), // Define o padding desejado
+          padding: const EdgeInsets.all(10),
           child: Column(
             children: [
-              SizedBox(height: 50), // Espaçamento entre os itens
+              SizedBox(height: 50),
               MesAnoSelector(
                 selectedDate: _selectedDate,
                 onPreviousMonth: () {
@@ -233,13 +230,6 @@ class _DespesasPageState extends State<DespesasPage> {
                     valor: formatarValorMonetario(_calcularTotal()),
                     background: Colors.blue),
               ),
-              // Text(tipoOperacao == 'receita' ? 'RECEITAS' : 'DESPESAS',
-              //     style: TextStyle(
-              //         color: tipoOperacao == 'receita'
-              //             ? Colors.greenAccent
-              //             : Colors.redAccent)),
-
-              // Exibe o SkeletonLoader enquanto os dados estão carregando
               if (isLoading)
                 Expanded(child: SkeletonLoader())
               else if (filteredDespesas != null && filteredDespesas.isNotEmpty)
@@ -256,12 +246,9 @@ class _DespesasPageState extends State<DespesasPage> {
                               operacaoData: filteredDespesas[index],
                               onSave: () {
                                 _fetchReceitas();
-                                // Função para chamar após salvar
                               },
                             ),
                           ));
-
-                          // Open the gerenciarOperacao modal with the expense data
                         },
                         child: OperacaoRow(
                           despesa: filteredDespesas[index],
@@ -287,8 +274,7 @@ class _DespesasPageState extends State<DespesasPage> {
         ),
       ),
       floatingActionButton: Padding(
-        padding: EdgeInsets.only(
-            right: 16.0, bottom: 16.0), // Ajuste o espaçamento desejado
+        padding: EdgeInsets.only(right: 16.0, bottom: 16.0),
         child: FloatingActionButton(
           onPressed: () {
             Navigator.of(context).push(MaterialPageRoute(
@@ -296,7 +282,6 @@ class _DespesasPageState extends State<DespesasPage> {
                 tipoOperacao: tipoOperacao,
                 onSave: () {
                   _fetchReceitas();
-                  // Função para chamar após salvar
                 },
               ),
             ));

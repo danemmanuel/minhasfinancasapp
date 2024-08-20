@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:minhas_financas_digitais/pages/cadastrar_conta_page.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -8,6 +9,8 @@ import '../components/BalanceTopPage.dart';
 import '../helpers/filtrar_operacoes.dart';
 import '../components/mes_ano_selector.dart';
 import '../helpers/formatar_valor_monetario.dart';
+import 'editar_conta_page.dart';
+import 'login_page.dart';
 
 class HomePage extends StatefulWidget {
   HomePage();
@@ -34,6 +37,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _fetchSaldo() async {
+    saldosPorInstituicao = {};
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String authToken = prefs.getString('authToken') ?? '';
 
@@ -62,6 +66,10 @@ class _HomePageState extends State<HomePage> {
           saldosPorInstituicao[instituicao] = saldo;
         }
       }
+    } else if (response.statusCode == 401) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => LoginPage()),
+      );
     } else {
       // Falha ao obter o saldo
       print('Falha ao obter o saldo. Código de status: ${response.statusCode}');
@@ -159,6 +167,40 @@ class _HomePageState extends State<HomePage> {
     return saldoAtual + totalReceitas - totalDespesas;
   }
 
+  Future<void> _deletarConta(id) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? authToken = prefs.getString('authToken');
+
+    if (authToken == null) {
+      // Handle the case where authToken is null (e.g., user not authenticated)
+      return;
+    }
+
+    final url = Uri.parse('https://financess-back.herokuapp.com/conta/' + id);
+
+    final response = await http.delete(
+      url,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(
+          'Conta removida com sucesso!',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        margin:
+            EdgeInsets.only(bottom: 0.0), // Ajuste o valor para mover para cima
+        duration: Duration(seconds: 2),
+      ));
+      _fetchSaldo();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -188,13 +230,15 @@ class _HomePageState extends State<HomePage> {
               BalanceTopPage(
                 isLoading: _isLoading,
                 item1: BalanceItem(
-                    titulo: 'Saldo Atual',
-                    valor: formatarValorMonetario(_calculateSaldoAtual()),
-                    background: Colors.green),
+                  titulo: 'Saldo Atual',
+                  valor: formatarValorMonetario(_calculateSaldoAtual()),
+                  background: Colors.green,
+                ),
                 item2: BalanceItem(
-                    titulo: 'Previsto',
-                    valor: formatarValorMonetario(_calculateSaldoPrevisto()),
-                    background: Colors.blue),
+                  titulo: 'Previsto',
+                  valor: formatarValorMonetario(_calculateSaldoPrevisto()),
+                  background: Colors.blue,
+                ),
               ),
               SizedBox(height: 20),
               Expanded(
@@ -209,70 +253,98 @@ class _HomePageState extends State<HomePage> {
                   itemCount: contas?.length ?? 0,
                   itemBuilder: (context, index) {
                     var conta = contas![index];
-                    return Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                    return Dismissible(
+                      key: Key(conta['id']
+                          .toString()), // Use a unique key for each item
+                      direction: DismissDirection
+                          .endToStart, // Swipe from right to left
+                      onDismissed: (direction) {
+                        setState(() {
+                          contas!
+                              .removeAt(index); // Remove the item from the list
+                        });
+                        // Call a function to delete the item from the database or API
+                        _deletarConta(conta['_id']);
+                      },
+                      background: Container(
+                        color: Colors.red,
+                        alignment: Alignment.centerRight,
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        child: Icon(Icons.delete, color: Colors.white),
                       ),
-                      elevation: 5,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment
-                              .spaceBetween, // Espaçar os elementos
-                          crossAxisAlignment: CrossAxisAlignment
-                              .center, // Alinhar verticalmente ao centro
-                          children: [
-                            Row(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => EditarContaPage(
+                              conta: conta,
+                              onSave: () {
+                                _fetchSaldo();
+                                _fetchOperacoes();
+                              },
+                            ),
+                          ));
+                        },
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 5,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(
-                                      20), // Ajuste o valor para o raio desejado
-                                  child: Image.asset(
-                                    'assets/images/${conta['instituicao'].toString().toLowerCase()}.png', // Caminho dinâmico para a imagem
-                                    width: 50,
-                                    height: 50,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Icon(Icons
-                                          .error); // Exibir um ícone de erro se a imagem falhar ao carregar
-                                    },
-                                  ),
+                                Row(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(20),
+                                      child: Image.asset(
+                                        'assets/images/${conta['instituicao'].toString().toLowerCase()}.png',
+                                        width: 50,
+                                        height: 50,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                          return Icon(Icons.error);
+                                        },
+                                      ),
+                                    ),
+                                    SizedBox(width: 20),
+                                    Text(
+                                      conta['instituicao'],
+                                      style: TextStyle(
+                                        fontSize: 17,
+                                        color: Colors.grey[700],
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                SizedBox(width: 20),
-                                Text(
-                                  conta['instituicao'],
-                                  style: TextStyle(
-                                    fontSize: 17, // Tamanho da fonte
-                                    color: Colors.grey[700],
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    SizedBox(height: 5),
+                                    Text(
+                                      'saldo de',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey[700],
+                                      ),
+                                    ),
+                                    Text(
+                                      formatarValorMonetario(
+                                          (conta['saldo'] as num).toDouble()),
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                            Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.end, // Alinhar à direita
-                              children: [
-                                SizedBox(height: 5),
-                                Text(
-                                  'saldo de',
-                                  style: TextStyle(
-                                    fontSize:
-                                        12, // Tamanho da fonte para o texto "saldo:"
-                                    color: Colors.grey[700],
-                                  ),
-                                ),
-                                Text(
-                                  formatarValorMonetario(
-                                      (conta['saldo'] as num).toDouble()),
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     );
@@ -283,6 +355,26 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(right: 16.0, bottom: 16.0),
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => CadastrarContaPage(
+                onSave: () {
+                  _fetchSaldo();
+                },
+              ),
+            ));
+          },
+          child: Icon(
+            Icons.add,
+            color: Colors.white,
+          ),
+          backgroundColor: Colors.blue,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     );
   }
 }
