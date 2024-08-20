@@ -39,87 +39,43 @@ class _DespesasPageState extends State<DespesasPage> {
   }
 
   Future<void> _fetchReceitas() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? authToken = prefs.getString('authToken');
-
-    if (authToken == null) {
-      return;
-    }
-
-    final url = tipoOperacao == 'despesa'
-        ? Uri.parse('https://financess-back.herokuapp.com/despesa')
-        : Uri.parse('https://financess-back.herokuapp.com/receita');
-
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': 'Bearer $authToken',
+    await _fetchData(
+      tipoOperacao == 'despesa'
+          ? 'https://financess-back.herokuapp.com/despesa'
+          : 'https://financess-back.herokuapp.com/receita',
+      (data) {
+        setState(() {
+          receitas = data;
+        });
       },
     );
-
-    if (response.statusCode == 200) {
-      setState(() {
-        receitas = json.decode(response.body);
-      });
-    } else {
-      print(
-          'Falha ao obter as receitas. Código de status: ${response.statusCode}');
-    }
   }
 
   Future<void> _deletarOperacao(operacao) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? authToken = prefs.getString('authToken');
-
-    if (authToken == null) {
-      return;
-    }
-
-    final url = tipoOperacao == 'despesa'
-        ? Uri.parse(
-            'https://financess-back.herokuapp.com/despesa/' + operacao['_id'])
-        : Uri.parse(
-            'https://financess-back.herokuapp.com/receita/' + operacao['_id']);
-
-    final response = await http.delete(
-      url,
-      headers: {
-        'Authorization': 'Bearer $authToken',
+    await _deleteData(
+      tipoOperacao == 'despesa'
+          ? 'https://financess-back.herokuapp.com/despesa/${operacao['_id']}'
+          : 'https://financess-back.herokuapp.com/receita/${operacao['_id']}',
+      () {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+            tipoOperacao == 'receita'
+                ? "Receita removida com sucesso!"
+                : 'Despesa removida com sucesso!',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(bottom: 0.0),
+          duration: Duration(seconds: 2),
+        ));
+        _fetchReceitas();
       },
     );
-
-    if (response.statusCode == 200) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(
-          tipoOperacao == 'receita'
-              ? "Receita removida com sucesso!"
-              : 'Despesa removida com sucesso!',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-        margin: EdgeInsets.only(bottom: 0.0),
-        duration: Duration(seconds: 2),
-      ));
-      _fetchReceitas();
-    }
   }
 
   Future<void> _efetivarOperacao(operacao) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? authToken = prefs.getString('authToken');
-
-    if (authToken == null) {
-      return;
-    }
-
-    setState(() {
-      operacao['efetivado'] = true;
-    });
-
-    final url = tipoOperacao == 'despesa'
-        ? Uri.parse('https://financess-back.herokuapp.com/despesa')
-        : Uri.parse('https://financess-back.herokuapp.com/receita');
+    operacao['efetivado'] = true;
 
     Map<String, dynamic> requestBody = {
       "_id": operacao['_id'],
@@ -131,9 +87,7 @@ class _DespesasPageState extends State<DespesasPage> {
       "data": operacao['fixa'] == true
           ? DateFormat('yyyy-MM-dd')
               .format(DateTime(_selectedDate.year, _selectedDate.month, 1))
-          : operacao['data'] != null
-              ? operacao['data']
-              : DateFormat('yyyy-MM-dd').format(DateTime.now()),
+          : operacao['data'] ?? DateFormat('yyyy-MM-dd').format(DateTime.now()),
       "excluirData": operacao['fixa']
           ? [
               ...(operacao['excluirData'] != null
@@ -146,17 +100,13 @@ class _DespesasPageState extends State<DespesasPage> {
       "conta": operacao['conta']
     };
 
-    print(json.encode(requestBody));
-    final response = await http.put(url,
-        headers: {
-          'Authorization': 'Bearer $authToken',
-          'Content-Type': 'application/json',
-        },
-        body: json.encode(requestBody));
-
-    if (response.statusCode == 200) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+    await _putData(
+      tipoOperacao == 'despesa'
+          ? 'https://financess-back.herokuapp.com/despesa'
+          : 'https://financess-back.herokuapp.com/receita',
+      requestBody,
+      () {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(
             tipoOperacao == 'receita'
                 ? "Receita efetivada com sucesso!"
@@ -167,9 +117,59 @@ class _DespesasPageState extends State<DespesasPage> {
           behavior: SnackBarBehavior.floating,
           margin: EdgeInsets.only(bottom: 0.0),
           duration: Duration(seconds: 2),
-        ),
-      );
-      _fetchReceitas();
+        ));
+        _fetchReceitas();
+      },
+    );
+  }
+
+  Future<void> _fetchData(String url, Function(List<dynamic>) onSuccess) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? authToken = prefs.getString('authToken');
+    if (authToken == null) return;
+
+    final response = await http
+        .get(Uri.parse(url), headers: {'Authorization': 'Bearer $authToken'});
+    if (response.statusCode == 200) {
+      onSuccess(json.decode(response.body));
+    } else {
+      print('Falha ao obter dados. Código de status: ${response.statusCode}');
+    }
+  }
+
+  Future<void> _deleteData(String url, Function onSuccess) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? authToken = prefs.getString('authToken');
+    if (authToken == null) return;
+
+    final response = await http.delete(Uri.parse(url),
+        headers: {'Authorization': 'Bearer $authToken'});
+    if (response.statusCode == 200) {
+      onSuccess();
+    } else {
+      print('Falha ao deletar dados. Código de status: ${response.statusCode}');
+    }
+  }
+
+  Future<void> _putData(
+      String url, Map<String, dynamic> body, Function onSuccess) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? authToken = prefs.getString('authToken');
+    if (authToken == null) return;
+
+    final response = await http.put(
+      Uri.parse(url),
+      headers: {
+        'Authorization': 'Bearer $authToken',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode(body),
+    );
+    if (response.statusCode == 200) {
+      onSuccess();
+    } else {
+      print(
+          'Falha ao atualizar dados. Código de status: ${response.statusCode}');
     }
   }
 
