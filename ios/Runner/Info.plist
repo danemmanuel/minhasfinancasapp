@@ -30,6 +30,19 @@
 	<string>Main</string>
 	<key>NSAllowsArbitraryLoads</key>
     <true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+    <dict>
+        <key>CFBundleTypeRole</key>
+        <string>Editor</string>
+        <key>CFBundleURLSchemes</key>
+        <array>
+            <string>com.googleusercontent.apps.639410286574-qudrbuj34o0vfauvapp7177ep3f5r3k7</string>
+        </array>
+    </dict>
+	</array>
+	<key>GIDClientID</key>
+	<string>639410286574-qudrbuj34o0vfauvapp7177ep3f5r3k7.apps.googleusercontent.com</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
