@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../components/BalanceTopPage.dart';
+import '../components/FloatingButton.dart';
 import '../helpers/filtrar_operacoes.dart';
 import '../components/mes_ano_selector.dart';
 import '../helpers/formatar_valor_monetario.dart';
@@ -355,25 +356,13 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      floatingActionButton: Padding(
-        padding: EdgeInsets.only(right: 16.0, bottom: 16.0),
-        child: FloatingActionButton(
-          onPressed: () {
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => CadastrarContaPage(
-                onSave: () {
-                  _fetchSaldo();
-                },
-              ),
-            ));
-          },
-          child: Icon(
-            Icons.add,
-            color: Colors.white,
+      floatingActionButton: FloatingButton(
+          builder: CadastrarContaPage(
+            onSave: () {
+              _fetchSaldo();
+            },
           ),
-          backgroundColor: Colors.blue,
-        ),
-      ),
+          backgroundColor: Colors.blue),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     );
   }

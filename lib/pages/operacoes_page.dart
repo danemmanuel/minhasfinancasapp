@@ -6,6 +6,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../components/BalanceTopPage.dart';
+import '../components/FloatingButton.dart';
+import '../components/ListarOperacao.dart';
 import '../helpers/formatar_valor_monetario.dart';
 import 'cadastrar_operacao_page.dart';
 import '../components/SkeletonLoader.dart';
@@ -171,7 +173,7 @@ class _DespesasPageState extends State<DespesasPage> {
     }
   }
 
-  void updateReceitas() {
+  dynamic updateReceitas() {
     _fetchReceitas();
   }
 
@@ -233,33 +235,13 @@ class _DespesasPageState extends State<DespesasPage> {
               if (isLoading)
                 Expanded(child: SkeletonLoader())
               else if (filteredDespesas != null && filteredDespesas.isNotEmpty)
-                Expanded(
-                  child: ListView.builder(
-                    padding: EdgeInsets.all(0),
-                    itemCount: filteredDespesas.length,
-                    itemBuilder: (context, index) {
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => EditarOperacaoPage(
-                              tipoOperacao: tipoOperacao,
-                              operacaoData: filteredDespesas[index],
-                              onSave: () {
-                                _fetchReceitas();
-                              },
-                            ),
-                          ));
-                        },
-                        child: OperacaoRow(
-                          despesa: filteredDespesas[index],
-                          onDelete: _deletarOperacao,
-                          onEfetivar: _efetivarOperacao,
-                          selectedDate: _selectedDate,
-                        ),
-                      );
-                    },
-                  ),
-                )
+                ListarOperacao(
+                    filteredDespesas: filteredDespesas,
+                    tipoOperacao: tipoOperacao,
+                    onSave: updateReceitas,
+                    onDelete: _deletarOperacao,
+                    onEfetivar: _efetivarOperacao,
+                    selectedDate: _selectedDate)
               else
                 Expanded(
                   child: Center(
@@ -273,27 +255,15 @@ class _DespesasPageState extends State<DespesasPage> {
           ),
         ),
       ),
-      floatingActionButton: Padding(
-        padding: EdgeInsets.only(right: 16.0, bottom: 16.0),
-        child: FloatingActionButton(
-          onPressed: () {
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => CadastrarOperacaoPage(
-                tipoOperacao: tipoOperacao,
-                onSave: () {
-                  _fetchReceitas();
-                },
-              ),
-            ));
-          },
-          child: Icon(
-            Icons.add,
-            color: Colors.white,
+      floatingActionButton: FloatingButton(
+          builder: CadastrarOperacaoPage(
+            tipoOperacao: tipoOperacao,
+            onSave: () {
+              _fetchReceitas();
+            },
           ),
           backgroundColor:
-              tipoOperacao == 'receita' ? Colors.green : Colors.red,
-        ),
-      ),
+              tipoOperacao == 'receita' ? Colors.green : Colors.red),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     );
   }
