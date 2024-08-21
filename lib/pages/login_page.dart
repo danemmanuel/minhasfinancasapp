@@ -8,6 +8,8 @@ import 'contas_page.dart';
 import 'operacoes_page.dart';
 
 class LoginApp extends StatelessWidget {
+  const LoginApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -18,6 +20,8 @@ class LoginApp extends StatelessWidget {
 }
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -179,12 +183,12 @@ class _LoginPageState extends State<LoginPage> {
                 _authenticateUser(
                     _emailController.text, _passwordController.text);
               },
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+              ),
               child: Text(
                 'Login',
                 style: TextStyle(color: Colors.white),
-              ),
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
               ),
             ),
             SizedBox(height: 20.0),

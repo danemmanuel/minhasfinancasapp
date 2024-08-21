@@ -11,8 +11,8 @@ class ListarOperacao extends StatelessWidget {
   final dynamic onEfetivar;
   final dynamic selectedDate;
 
-  ListarOperacao(
-      {required this.filteredDespesas,
+  const ListarOperacao(
+      {super.key, required this.filteredDespesas,
       required this.tipoOperacao,
       required this.onSave,
       required this.onDelete,

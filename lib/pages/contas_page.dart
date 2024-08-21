@@ -13,7 +13,7 @@ import '../helpers/formatar_valor_monetario.dart';
 import 'login_page.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage();
+  const HomePage({super.key});
 
   @override
   _HomePageState createState() => _HomePageState();

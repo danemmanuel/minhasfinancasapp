@@ -7,8 +7,8 @@ class ListarContas extends StatelessWidget {
   final Function onDismissed;
   final dynamic onSave;
 
-  ListarContas(
-      {required this.contas, required this.onDismissed, required this.onSave});
+  const ListarContas(
+      {super.key, required this.contas, required this.onDismissed, required this.onSave});
 
   @override
   Widget build(BuildContext context) {

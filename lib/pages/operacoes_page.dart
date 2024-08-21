@@ -15,9 +15,10 @@ import '../components/mes_ano_selector.dart';
 
 class DespesasPage extends StatefulWidget {
   final String tipoOperacao;
+  @override
   final Key? key;
 
-  DespesasPage({required this.tipoOperacao, this.key});
+  const DespesasPage({required this.tipoOperacao, this.key});
 
   @override
   _DespesasPageState createState() => _DespesasPageState();
@@ -182,14 +183,14 @@ class _DespesasPageState extends State<DespesasPage> {
     List<dynamic>? filteredDespesas =
         filterDespesas(receitas, _selectedDate.year, _selectedDate.month);
 
-    double _calcularPendente() {
+    double calcularPendente() {
       return filteredDespesas!
           .where((operacao) =>
               operacao['efetivado'] == false || operacao['efetivado'] == null)
           .fold(0, (total, operacao) => total + operacao['valor']);
     }
 
-    double _calcularTotal() {
+    double calcularTotal() {
       return filteredDespesas!
           .fold(0, (total, operacao) => total + operacao['valor']);
     }
@@ -207,14 +208,14 @@ class _DespesasPageState extends State<DespesasPage> {
                   setState(() {
                     _selectedDate =
                         DateTime(_selectedDate.year, _selectedDate.month - 1);
-                    _calcularPendente();
+                    calcularPendente();
                   });
                 },
                 onNextMonth: () {
                   setState(() {
                     _selectedDate =
                         DateTime(_selectedDate.year, _selectedDate.month + 1);
-                    _calcularPendente();
+                    calcularPendente();
                   });
                 },
               ),
@@ -222,12 +223,12 @@ class _DespesasPageState extends State<DespesasPage> {
                 isLoading: isLoading,
                 item1: BalanceItem(
                     titulo: 'Pendente',
-                    valor: formatarValorMonetario(_calcularPendente()),
+                    valor: formatarValorMonetario(calcularPendente()),
                     background:
                         tipoOperacao == 'receita' ? Colors.green : Colors.red),
                 item2: BalanceItem(
                     titulo: 'Total',
-                    valor: formatarValorMonetario(_calcularTotal()),
+                    valor: formatarValorMonetario(calcularTotal()),
                     background: Colors.blue),
               ),
               if (isLoading)

@@ -11,7 +11,7 @@ import '../components/LabelInput.dart';
 class CadastrarContaPage extends StatefulWidget {
   final void Function() onSave;
 
-  CadastrarContaPage({
+  const CadastrarContaPage({super.key, 
     required this.onSave,
   });
 
@@ -25,7 +25,7 @@ class _EditOperationPageState extends State<CadastrarContaPage> {
     decimalSeparator: ',',
     thousandSeparator: '.',
   );
-  TextEditingController _nomeController = TextEditingController();
+  final TextEditingController _nomeController = TextEditingController();
   dynamic _selectedConta;
   dynamic _selectedBanco;
   List<dynamic> contas = [];

@@ -4,7 +4,7 @@ class FloatingButton extends StatelessWidget {
   final dynamic builder;
   final dynamic backgroundColor;
 
-  FloatingButton({required this.builder, required this.backgroundColor});
+  const FloatingButton({super.key, required this.builder, required this.backgroundColor});
 
   @override
   Widget build(BuildContext context) {
@@ -16,11 +16,11 @@ class FloatingButton extends StatelessWidget {
             builder: (context) => builder,
           ));
         },
+        backgroundColor: backgroundColor,
         child: Icon(
           Icons.add,
           color: Colors.white,
         ),
-        backgroundColor: backgroundColor,
       ),
     );
   }

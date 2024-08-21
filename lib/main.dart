@@ -14,6 +14,8 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
@@ -52,11 +54,11 @@ class MyApp extends StatelessWidget {
 
           return MaterialApp(
             locale: Locale('pt', 'BR'), // Define a localidade como pt_BR
-            supportedLocales: [
-              const Locale('en', 'US'),
-              const Locale('pt', 'BR'), // Adiciona suporte a pt_BR
+            supportedLocales: const [
+              Locale('en', 'US'),
+              Locale('pt', 'BR'), // Adiciona suporte a pt_BR
             ],
-            localizationsDelegates: [
+            localizationsDelegates: const [
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,

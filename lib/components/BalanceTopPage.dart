@@ -14,7 +14,7 @@ class BalanceTopPage extends StatelessWidget {
   final BalanceItem item1;
   final BalanceItem item2;
 
-  BalanceTopPage({
+  const BalanceTopPage({super.key, 
     required this.item1,
     required this.item2,
     required this.isLoading,

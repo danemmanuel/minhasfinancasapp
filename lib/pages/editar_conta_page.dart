@@ -12,7 +12,7 @@ class EditarContaPage extends StatefulWidget {
   final void Function() onSave;
   final Map<String, dynamic> conta;
 
-  EditarContaPage({
+  const EditarContaPage({super.key, 
     required this.conta,
     required this.onSave,
   });

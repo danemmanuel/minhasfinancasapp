@@ -4,7 +4,7 @@ class PageContainer extends StatefulWidget {
   final List<Widget> pages;
   final List<BottomNavigationBarItem> bottomNavBarItems;
 
-  PageContainer({required this.pages, required this.bottomNavBarItems});
+  const PageContainer({super.key, required this.pages, required this.bottomNavBarItems});
 
   @override
   _PageContainerState createState() => _PageContainerState();

@@ -5,7 +5,7 @@ class MesAnoSelector extends StatelessWidget {
   final VoidCallback onPreviousMonth;
   final VoidCallback onNextMonth;
 
-  MesAnoSelector({
+  const MesAnoSelector({super.key, 
     required this.selectedDate,
     required this.onPreviousMonth,
     required this.onNextMonth,

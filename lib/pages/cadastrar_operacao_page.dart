@@ -13,7 +13,7 @@ class CadastrarOperacaoPage extends StatefulWidget {
   final String tipoOperacao;
   final void Function() onSave;
 
-  CadastrarOperacaoPage({
+  const CadastrarOperacaoPage({super.key, 
     required this.tipoOperacao,
     required this.onSave,
   });
@@ -30,7 +30,7 @@ class _EditOperationPageState extends State<CadastrarOperacaoPage> {
     decimalSeparator: ',',
     thousandSeparator: '.',
   );
-  TextEditingController _nomeController = TextEditingController();
+  final TextEditingController _nomeController = TextEditingController();
   bool _isPago = false;
   bool _isFixo = false;
   DateTime _selectedDate = DateTime.now();
@@ -296,7 +296,7 @@ class _EditOperationPageState extends State<CadastrarOperacaoPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '${DateFormat('dd MMM yyyy', 'pt_BR').format(_selectedDate)}',
+                        DateFormat('dd MMM yyyy', 'pt_BR').format(_selectedDate),
                         style: TextStyle(fontSize: 15),
                       ),
                       Row(

@@ -9,8 +9,8 @@ class OperacaoRow extends StatefulWidget {
   final Function onEfetivar;
   final dynamic selectedDate;
 
-  OperacaoRow(
-      {required this.despesa,
+  const OperacaoRow(
+      {super.key, required this.despesa,
       required this.onDelete,
       required this.onEfetivar,
       required this.selectedDate});
@@ -46,11 +46,9 @@ class _OperacaoRowState extends State<OperacaoRow> {
     String contaDescricao = widget.despesa['conta'] != null
         ? widget.despesa['conta']['instituicao']
         : '';
-    String categoriaDescricao = widget.despesa['categoria']['descricao'] != null
-        ? widget.despesa['categoria']['descricao']
-        : '';
+    String categoriaDescricao = widget.despesa['categoria']['descricao'] ?? '';
 
-    String categoria = contaDescricao + ' | ' + (categoriaDescricao ?? '-');
+    String categoria = '$contaDescricao | ${categoriaDescricao ?? '-'}';
 
     String fixa() {
       final DateTime data = DateTime.parse(widget.despesa['data']);

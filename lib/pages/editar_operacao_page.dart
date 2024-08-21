@@ -14,7 +14,7 @@ class EditarOperacaoPage extends StatefulWidget {
   final dynamic operacaoData;
   final void Function() onSave;
 
-  EditarOperacaoPage({
+  const EditarOperacaoPage({super.key, 
     required this.tipoOperacao,
     required this.operacaoData,
     required this.onSave,
@@ -32,7 +32,7 @@ class _EditOperationPageState extends State<EditarOperacaoPage> {
     decimalSeparator: ',',
     thousandSeparator: '.',
   );
-  TextEditingController _nomeController = TextEditingController();
+  final TextEditingController _nomeController = TextEditingController();
   bool _isPago = false;
   DateTime _selectedDate = DateTime.now();
   dynamic _selectedConta;
@@ -97,9 +97,7 @@ class _EditOperationPageState extends State<EditarOperacaoPage> {
       "fixa": operacaoData['fixa'],
       "data": DateFormat('yyyy-MM-dd').format(_selectedDate),
       "categoria": {
-        "descricao": _selectedCategoria != null
-            ? _selectedCategoria
-            : operacaoData['categoria']['descricao'],
+        "descricao": _selectedCategoria ?? operacaoData['categoria']['descricao'],
         "_id": '66b9ea9664ad1d0015c1c95f'
       },
       "excluirData": operacaoData['fixa'] == true &&
