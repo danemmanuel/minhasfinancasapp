@@ -21,6 +21,16 @@ class ListarOperacao extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Ordenar as despesas para que as não efetivadas apareçam primeiro
+    filteredDespesas.sort((a, b) {
+      if (a['efetivado'] == false || a['efetivado'] == null) {
+        return -1;
+      } else if (b['efetivado'] == false || b['efetivado'] == null) {
+        return 1;
+      }
+      return 0;
+    });
+
     return Expanded(
       child: ListView.builder(
         padding: EdgeInsets.all(0),
