@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:minhas_financas_digitais/pages/editar_operacao_page.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,7 +11,6 @@ import '../helpers/formatar_valor_monetario.dart';
 import 'cadastrar_operacao_page.dart';
 import '../components/SkeletonLoader.dart';
 import '../helpers/filtrar_operacoes.dart';
-import '../components/operacao_row.dart';
 import '../components/mes_ano_selector.dart';
 
 class DespesasPage extends StatefulWidget {

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
 import 'package:minhas_financas_digitais/pages/cadastrar_conta_page.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,7 +10,6 @@ import '../components/ListarContas.dart';
 import '../helpers/filtrar_operacoes.dart';
 import '../components/mes_ano_selector.dart';
 import '../helpers/formatar_valor_monetario.dart';
-import 'editar_conta_page.dart';
 import 'login_page.dart';
 
 class HomePage extends StatefulWidget {
