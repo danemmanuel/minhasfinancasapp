@@ -48,8 +48,6 @@ class MyApp extends StatelessWidget {
               icon: Icon(Icons.keyboard_arrow_down),
               label: 'Despesas',
             ),
-
-            // Adicione quantos itens de navegação desejar
           ];
 
           return MaterialApp(

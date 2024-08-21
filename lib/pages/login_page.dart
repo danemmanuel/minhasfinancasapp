@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../components/page_container.dart';
 import 'contas_page.dart';
+import 'operacoes_page.dart';
 
 class LoginApp extends StatelessWidget {
   @override
@@ -62,6 +64,34 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _googleSignInMethod() async {
     try {
+      List<Widget> pages = [
+        HomePage(),
+        DespesasPage(
+          key: UniqueKey(),
+          tipoOperacao: 'receita',
+        ),
+        DespesasPage(
+          key: UniqueKey(),
+          tipoOperacao: 'despesa',
+        ),
+        // Adicione outras páginas aqui
+      ];
+
+      List<BottomNavigationBarItem> bottomNavBarItems = [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.account_balance),
+          label: 'Contas',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.keyboard_arrow_up),
+          label: 'Receitas',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.keyboard_arrow_down),
+          label: 'Despesas',
+        ),
+      ];
+
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         // O login foi cancelado pelo usuário
@@ -93,7 +123,9 @@ class _LoginPageState extends State<LoginPage> {
 
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => HomePage()),
+              MaterialPageRoute(
+                  builder: (context) => PageContainer(
+                      pages: pages, bottomNavBarItems: bottomNavBarItems)),
             );
           } else {
             print('Erro: accessToken é nulo');
@@ -114,18 +146,22 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Login Page'),
-      ),
+      appBar: AppBar(),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Text(
+              'Entre com seu email e senha',
+              style: TextStyle(color: Colors.white),
+            ),
+            SizedBox(height: 20.0),
             TextField(
               controller: _emailController,
               decoration: InputDecoration(
                 labelText: 'Email',
+                border: OutlineInputBorder(),
               ),
             ),
             SizedBox(height: 20.0),
@@ -133,6 +169,7 @@ class _LoginPageState extends State<LoginPage> {
               controller: _passwordController,
               decoration: InputDecoration(
                 labelText: 'Password',
+                border: OutlineInputBorder(),
               ),
               obscureText: true,
             ),
@@ -142,12 +179,40 @@ class _LoginPageState extends State<LoginPage> {
                 _authenticateUser(
                     _emailController.text, _passwordController.text);
               },
-              child: Text('Login'),
+              child: Text(
+                'Login',
+                style: TextStyle(color: Colors.white),
+              ),
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+              ),
+            ),
+            SizedBox(height: 20.0),
+            Text(
+              'ou',
+              style: TextStyle(color: Colors.white),
             ),
             SizedBox(height: 20.0),
             ElevatedButton(
               onPressed: _googleSignInMethod,
-              child: Text('Login with Google'),
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                side: BorderSide(color: Colors.grey),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Image.asset(
+                    'assets/images/google-icon.webp', // Certifique-se de que o logo do Google está na pasta assets
+                    height: 24.0,
+                  ),
+                  SizedBox(width: 10),
+                  Text(
+                    'Entre com o Google',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
